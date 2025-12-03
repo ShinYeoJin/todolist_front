@@ -6,13 +6,20 @@ export default function DarkModeToggle() {
 
   useEffect(() => {
     // LocalStorage에서 테마 불러오기
-    const savedTheme = localStorage.getItem("theme");
+    const savedTheme = window.localStorage.getItem("theme");
     const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
 
-    if (savedTheme === "dark" || (!savedTheme && prefersDark)) {
-      setIsDark(true);
+    const shouldBeDark = savedTheme === "dark" || (!savedTheme && prefersDark);
+
+    // 초기 테마는 DOM을 기준으로만 설정하고, React state는 DOM 클래스에 맞춰 동기화
+    if (shouldBeDark) {
       document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
     }
+
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setIsDark(shouldBeDark);
   }, []);
 
   const toggleDarkMode = () => {

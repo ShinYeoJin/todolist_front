@@ -1,20 +1,34 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Plus } from "lucide-react";
 import dayjs from "dayjs";
+import axios from "../../utils/api";
 
 export default function TodoForm({ onAddTodo, selectedDate }) {
   const [title, setTitle] = useState("");
   const [date, setDate] = useState(selectedDate || dayjs().format("YYYY-MM-DD"));
 
-  const handleSubmit = (e) => {
+  // 상위에서 날짜를 선택/변경했을 때 입력 필드도 함께 따라가도록 동기화
+  useEffect(() => {
+    if (!selectedDate) return;
+
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setDate(selectedDate);
+  }, [selectedDate]);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!title.trim()) {
-      alert("🦡 Please enter a task!");
+      alert("Please enter a task!");
       return;
     }
 
-    onAddTodo({ title: title.trim(), date });
-    setTitle("");
+    try {
+      const response = await axios.post("/todos", { title: title.trim(), date });
+      onAddTodo(response.data.data);
+      setTitle("");
+    } catch (error) {
+      console.error("Failed to add todo:", error);
+    }
   };
 
   return (
